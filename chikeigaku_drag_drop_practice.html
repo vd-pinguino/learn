@@ -1,0 +1,220 @@
+
+<h2 class="sr-only">地形 重要語句 穴埋め練習問題 — ドラッグ＆ドロップ形式</h2>
+<style>
+*{box-sizing:border-box}
+.app{padding:.75rem 0;font-family:var(--font-sans)}
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:1.1rem}
+.prog-bar{flex:1;height:5px;background:var(--color-background-secondary);border-radius:3px}
+.prog-fill{height:100%;border-radius:3px;background:#1D9E75;transition:width .4s}
+.prog-txt{font-size:12px;color:var(--color-text-secondary);white-space:nowrap}
+.tabs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:1.25rem}
+.tab{padding:5px 11px;font-size:12px;cursor:pointer;border:0.5px solid var(--color-border-tertiary);border-radius:20px;background:transparent;color:var(--color-text-secondary);transition:all .12s;white-space:nowrap;line-height:1.5}
+.tab:hover{background:var(--color-background-secondary)}
+.sec-hd{display:flex;align-items:center;gap:8px;margin-bottom:1rem;font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.sec-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.qs{display:flex;flex-direction:column;gap:7px;margin-bottom:1.2rem}
+.qr{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 14px;font-size:13.5px;line-height:2.1;color:var(--color-text-primary)}
+.qn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--color-background-secondary);font-size:11px;font-weight:500;color:var(--color-text-secondary);vertical-align:middle;margin-right:6px;flex-shrink:0}
+.blank{display:inline-flex;align-items:center;justify-content:center;min-width:96px;min-height:28px;padding:3px 10px;border-radius:4px;border:1.5px dashed var(--color-border-secondary);vertical-align:middle;cursor:default;transition:all .12s;font-size:13px;font-weight:500;color:transparent}
+.blank.over,.blank.target{border-style:solid;border-color:#378ADD;background:rgba(55,138,221,.1)}
+.blank.filled{border-style:solid;border-color:var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);cursor:pointer}
+.blank.filled:hover{border-color:var(--color-border-primary)}
+.blank.correct{border-style:solid;background:rgba(99,153,34,.13);border-color:#639922;color:#3B6D11;cursor:default}
+.blank.incorrect{border-style:solid;background:rgba(226,75,74,.1);border-color:#E24B4A;color:#A32D2D;cursor:pointer}
+.bank-wrap{margin-bottom:1rem}
+.bank-hint{font-size:12px;color:var(--color-text-secondary);margin-bottom:6px}
+.bank{display:flex;flex-wrap:wrap;gap:7px;padding:12px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);min-height:54px}
+.chip{display:inline-block;padding:5px 12px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:13px;cursor:grab;user-select:none;transition:all .12s;color:var(--color-text-primary)}
+.chip:hover{border-color:var(--color-border-primary)}
+.chip.dragging{opacity:.3}
+.chip.selected{background:rgba(55,138,221,.12);border-color:#378ADD;color:#185FA5}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn-p{padding:7px 16px;font-size:13px;cursor:pointer;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);transition:all .12s}
+.btn-p:hover{background:var(--color-background-secondary)}
+.btn-g{padding:7px 14px;font-size:13px;cursor:pointer;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-secondary);transition:all .12s}
+.btn-g:hover{background:var(--color-background-secondary)}
+.res{font-size:13px;color:var(--color-text-secondary);margin-left:auto}
+.res.ok{color:#3B6D11;font-weight:500}
+.res.ng{color:#A32D2D}
+.nav-row{display:flex;justify-content:space-between;margin-top:1rem}
+.nav-btn{padding:6px 12px;font-size:12px;cursor:pointer;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-secondary);transition:all .12s}
+.nav-btn:hover:not(:disabled){background:var(--color-background-secondary)}
+.nav-btn:disabled{opacity:.3;cursor:default}
+.all-done{text-align:center;padding:1rem;font-size:13px;color:#3B6D11;background:rgba(99,153,34,.1);border-radius:var(--border-radius-md);border:0.5px solid #639922;margin-top:.5rem}
+</style>
+<div class="app" id="app">
+  <div class="prog-row">
+    <div class="prog-bar"><div class="prog-fill" id="pgf" style="width:0%"></div></div>
+    <div class="prog-txt" id="pgt">0 / 0 正解</div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div id="view"></div>
+</div>
+<script>
+const S=[
+  {label:'河川地形',title:'河川流域の小地形',color:'#185FA5',qs:[
+    {t:'太陽エネルギーは {X} の源で、岩石の風化や土砂の侵食・運搬・堆積を引き起こす。',a:'外的営力'},
+    {t:'比較的小規模な谷や沖積平野などは {X} とよばれる。',a:'小地形'},
+    {t:'山地の急斜面が崩れて後退し、{X} が形成される。',a:'V字谷'},
+    {t:'谷口では礫や砂が扇形に堆積し、{X} が形成される。',a:'扇状地'},
+    {t:'扇状地を流れる川は砂礫層を伏流し、{X} になることが多い。',a:'水無川'},
+    {t:'洪水時に砂が堆積してできる微高地を {X} とよぶ。',a:'自然堤防'},
+    {t:'自然堤防の背後にできる水はけの悪い低地を {X} とよぶ。',a:'後背湿地'},
+    {t:'流路変更後に残される三日月形の湖を {X} とよぶ。',a:'三日月湖（河跡湖）'},
+    {t:'洪水によって形成される地形全体を {X} とよぶ。',a:'泥濫原'},
+    {t:'河口で砂や泥が堆積してできる地形を {X}（デルタ）とよぶ。',a:'三角州'},
+  ]},
+  {label:'台地・段丘',title:'台地・丘陵・河岸段丘',color:'#3B6D11',qs:[
+    {t:'沖積平野の周縁部にある崖に囲まれた平坦な地形を {X} とよぶ。',a:'台地'},
+    {t:'平坦地を含まず起伏に富む低い山地を {X} とよぶ。',a:'丘陵'},
+    {t:'河川沿いに形成される階段状の地形を {X} とよぶ。',a:'河岸段丘'},
+    {t:'階段状地形のほぼ平坦な面を {X} とよぶ。',a:'段丘面'},
+    {t:'段丘面を区切る崖を {X} とよぶ。',a:'段丘崖'},
+    {t:'縄文時代の海面上昇を {X} とよぶ。',a:'縄文海進'},
+    {t:'海面上昇によって水没した谷を {X} とよぶ。',a:'おぼれ谷'},
+  ]},
+  {label:'海岸地形',title:'海岸にみられる小地形',color:'#0F6E56',qs:[
+    {t:'砂の堆積作用が活発な海岸を {X} とよぶ。',a:'砂浜海岸'},
+    {t:'岩盤への侵食作用が活発な海岸を {X} とよぶ。',a:'岩石海岸'},
+    {t:'干潮時に露出する泥や砂の地形を {X} とよぶ。',a:'干潟'},
+    {t:'砂州が延びて陸と島をつなぐ地形を {X}（トンボロ）とよぶ。',a:'陸繋砂州'},
+    {t:'砂州によって外海と隔てられた浅い水域を {X} とよぶ。',a:'ラグーン'},
+    {t:'土地の隆起や海面低下で形成される海岸を {X} とよぶ。',a:'離水海岸'},
+    {t:'土地の沈降や海面上昇で形成される海岸を {X} とよぶ。',a:'沈水海岸'},
+    {t:'入り江が連続する沈水海岸を {X} とよぶ。',a:'リアス海岸'},
+    {t:'氷河のU字谷に海水が入り込んだ地形を {X} とよぶ。',a:'フィヨルド'},
+    {t:'河口付近の低地に海水が入り込んだ地形を {X}（三角江）とよぶ。',a:'エスチュアリ'},
+  ]},
+  {label:'サンゴ礁',title:'サンゴ礁の発達',color:'#D85A30',qs:[
+    {t:'島を縁どるように発達するサンゴ礁を {X} とよぶ。',a:'裾礁'},
+    {t:'ラグーンを挟んで島を取り巻くサンゴ礁を {X} とよぶ。',a:'堡礁'},
+    {t:'島が沈降した後に輪状に残ったサンゴ礁を {X} とよぶ。',a:'環礁'},
+  ]},
+  {label:'氷河地形',title:'氷河によってつくられた地形',color:'#534AB7',qs:[
+    {t:'谷の地形制約を受けて流れる氷河を {X} とよぶ。',a:'山岳氷河'},
+    {t:'地形の制約なしに巨大なドーム状をなす氷河を {X}（氷床）とよぶ。',a:'大陸氷河'},
+    {t:'氷河が谷底や谷壁を深くえぐってできた谷を {X} とよぶ。',a:'U字谷'},
+    {t:'山頂近くに形成されるすり鉢状のくぼ地を {X}（圏谷）とよぶ。',a:'カール'},
+    {t:'氷河末端部に堤防状に堆積した丘を {X} とよぶ。',a:'モレーン'},
+    {t:'氷河地形の凹地に水がたまった湖を {X} とよぶ。',a:'氷河湖'},
+    {t:'地球全体が寒冷だった時代を {X} とよぶ。',a:'氷期'},
+  ]},
+  {label:'乾燥地形',title:'乾燥地域にみられる地形',color:'#BA7517',qs:[
+    {t:'砂丘が発達する砂漠を {X} とよぶ。',a:'砂砂漠'},
+    {t:'岩石が露出した砂漠を {X} とよぶ。',a:'岩石砂漠'},
+    {t:'硬い岩石が侵食されてできたテーブル状の地形を {X} とよぶ。',a:'メサ'},
+    {t:'メサがさらに侵食された塔状の地形を {X} とよぶ。',a:'ビュート'},
+    {t:'湿潤地域から乾燥地域へ流れ込む川を {X} とよぶ。',a:'外来河川'},
+    {t:'乾燥地域で水が得られる場所を {X} とよぶ。',a:'オアシス'},
+    {t:'乾燥地域のふだんは流水のないかれ川を {X} とよぶ。',a:'ワジ'},
+    {t:'海に出口をもたない川を {X} とよぶ。',a:'内陸河川'},
+  ]},
+  {label:'カルスト',title:'カルスト地形',color:'#444441',qs:[
+    {t:'石灰岩地域の地表にできる多数のくぼ地を {X} とよぶ。',a:'ドリーネ'},
+    {t:'ドリーネが結合・拡大した地形を {X} とよぶ。',a:'ウバーレ'},
+    {t:'100km²以上に及ぶ大きな溶食盆地を {X} とよぶ。',a:'ポリエ（溶食盆地）'},
+    {t:'地下水による溶食でできた地下空洞を {X} とよぶ。',a:'鍾乳洞'},
+    {t:'石灰岩の溶食によって形成される特有の地形を {X} 地形とよぶ。',a:'カルスト'},
+  ]},
+];
+
+const wordOrders=S.map(s=>{
+  const a=[...s.qs.map(q=>q.a)];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+});
+
+let cur=0,fills={},chk=new Set(),selChip=null,dragW=null;
+function K(si,qi){return si+'_'+qi;}
+function totals(){let c=0,t=0;S.forEach((s,si)=>s.qs.forEach((q,qi)=>{t++;if(fills[K(si,qi)]===q.a)c++;}));return{c,t};}
+function secC(si){let c=0;S[si].qs.forEach((q,qi)=>{if(fills[K(si,qi)]===q.a)c++;});return c;}
+
+function render(){
+  const{c,t}=totals();
+  document.getElementById('pgf').style.width=Math.round(c/t*100)+'%';
+  document.getElementById('pgt').textContent=c+' / '+t+' 正解';
+  const tabsEl=document.getElementById('tabs');
+  tabsEl.innerHTML=S.map((s,i)=>{
+    const done=secC(i)===s.qs.length;
+    const act=i===cur;
+    const st=act?`border-color:${s.color};color:${s.color};background:${s.color}18;font-weight:500`:done?`color:var(--color-text-secondary)`:''
+    return`<div class="tab" onclick="sw(${i})" style="${st}">${s.label}${done?' ✓':''}</div>`;
+  }).join('');
+  renderSec();
+}
+
+function renderSec(){
+  const s=S[cur],si=cur;
+  const used=new Set(s.qs.map((q,qi)=>fills[K(si,qi)]).filter(Boolean));
+  let h=`<div class="sec-hd"><span class="sec-dot" style="background:${s.color}"></span>${s.title}<span style="font-size:12px;color:var(--color-text-secondary);font-weight:400;margin-left:4px">(${secC(si)}/${s.qs.length})</span></div><div class="qs">`;
+  s.qs.forEach((q,qi)=>{
+    const key=K(si,qi),w=fills[key],isChk=chk.has(key),isOk=w===q.a;
+    let bc='blank';
+    if(w){bc+=isChk?(isOk?' correct':' incorrect'):' filled';}
+    else if(selChip){bc+=' target';}
+    const[p1,p2]=q.t.split('{X}');
+    h+=`<div class="qr"><span class="qn">${qi+1}</span>${p1}<span class="${bc}" data-k="${key}"
+      ondragover="event.preventDefault();event.currentTarget.classList.add('over')"
+      ondragleave="event.currentTarget.classList.remove('over')"
+      ondrop="doDrop(event,'${key}')"
+      onclick="blkClk('${key}')"
+    >${w||''}</span>${p2}</div>`;
+  });
+  h+=`</div><div class="bank-wrap"><div class="bank-hint">語群 ― ドラッグまたはクリックして選択 → 空欄をクリック</div><div class="bank" id="bank">`;
+  const avail=wordOrders[si].filter(w=>!used.has(w));
+  if(!avail.length){h+=`<span style="font-size:13px;color:var(--color-text-secondary)">すべて配置済みです</span>`;}
+  else{avail.forEach(w=>{const sel=selChip===w;h+=`<div class="chip${sel?' selected':''}" draggable="true" data-w="${w}" ondragstart="dsStart(event,'${w}')" ondragend="dsEnd(event)" onclick="chipClk('${w}')">${w}</div>`;});}
+  h+=`</div></div><div class="actions"><button class="btn-p" onclick="doChk()">答え合わせ</button><button class="btn-g" onclick="doReset()">リセット</button><span class="res" id="res"></span></div>`;
+  const allDone=secC(si)===s.qs.length&&s.qs.every((q,qi)=>chk.has(K(si,qi)));
+  if(allDone)h+=`<div class="all-done">🎉 このセクション全問正解！</div>`;
+  h+=`<div class="nav-row"><button class="nav-btn" onclick="sw(${cur-1})" ${cur===0?'disabled':''}>← 前へ</button><button class="nav-btn" onclick="sw(${cur+1})" ${cur===S.length-1?'disabled':''}>次へ →</button></div>`;
+  document.getElementById('view').innerHTML=h;
+}
+
+function sw(i){if(i<0||i>=S.length)return;cur=i;selChip=null;render();}
+
+function dsStart(ev,w){dragW=w;ev.dataTransfer.setData('text/plain',w);ev.dataTransfer.effectAllowed='copy';setTimeout(()=>{const el=document.querySelector(`.chip[data-w="${w}"]`);if(el)el.classList.add('dragging');},0);}
+function dsEnd(ev){dragW=null;document.querySelectorAll('.chip.dragging').forEach(e=>e.classList.remove('dragging'));}
+
+function doDrop(ev,key){
+  ev.preventDefault();
+  ev.currentTarget.classList.remove('over');
+  const w=ev.dataTransfer.getData('text/plain')||dragW;
+  if(w)placeW(w,key);
+}
+
+function chipClk(w){selChip=selChip===w?null:w;render();}
+
+function blkClk(key){
+  if(selChip){placeW(selChip,key);return;}
+  const si=parseInt(key),qi=parseInt(key.split('_')[1]);
+  const isOk=fills[key]===S[cur].qs[qi].a;
+  if(fills[key]&&(!chk.has(key)||!isOk)){delete fills[key];chk.delete(key);render();}
+}
+
+function placeW(w,key){
+  Object.keys(fills).forEach(ek=>{if(fills[ek]===w){delete fills[ek];chk.delete(ek);}});
+  if(fills[key])chk.delete(key);
+  fills[key]=w;chk.delete(key);selChip=null;render();
+}
+
+function doChk(){
+  const si=cur,s=S[si];
+  let filled=0,correct=0;
+  s.qs.forEach((q,qi)=>{const key=K(si,qi);if(fills[key]){filled++;chk.add(key);if(fills[key]===q.a)correct++;}});
+  render();
+  const res=document.getElementById('res');
+  if(!res)return;
+  if(!filled){res.textContent='語句を配置してください';res.className='res';}
+  else if(correct===s.qs.length&&filled===s.qs.length){res.textContent='全問正解！🎉';res.className='res ok';}
+  else{res.textContent=correct+' / '+filled+' 正解';res.className='res ng';}
+}
+
+function doReset(){
+  const si=cur;
+  S[si].qs.forEach((q,qi)=>{const key=K(si,qi);delete fills[key];chk.delete(key);});
+  selChip=null;render();
+}
+
+render();
+</script>

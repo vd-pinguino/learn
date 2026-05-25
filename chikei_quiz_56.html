@@ -1,0 +1,268 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.wrap { padding: 1rem 0; max-width: 680px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 8px; }
+.title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+.stats { display: flex; gap: 12px; font-size: 13px; color: var(--color-text-secondary); }
+.stat-val { font-weight: 500; color: var(--color-text-primary); }
+.progress-bar { width: 100%; height: 4px; background: var(--color-border-tertiary); border-radius: 2px; margin-bottom: 1.5rem; overflow: hidden; }
+.progress-fill { height: 100%; background: #1D9E75; border-radius: 2px; transition: width 0.3s; }
+.category-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.tab { padding: 5px 12px; font-size: 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); cursor: pointer; color: var(--color-text-secondary); background: var(--color-background-primary); transition: all 0.15s; }
+.tab.active { background: #E1F5EE; border-color: #1D9E75; color: #0F6E56; font-weight: 500; }
+.tab:hover:not(.active) { background: var(--color-background-secondary); }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 2rem 1.5rem; min-height: 200px; display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 1rem; }
+.q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.q-num { font-size: 12px; color: var(--color-text-tertiary); }
+.q-cat { font-size: 11px; padding: 3px 8px; border-radius: var(--border-radius-md); background: #E1F5EE; color: #0F6E56; font-weight: 500; }
+.q-text { font-size: 17px; font-weight: 500; color: var(--color-text-primary); line-height: 1.6; margin-bottom: 1.5rem; flex: 1; }
+.answer-area { min-height: 56px; display: flex; align-items: center; }
+.answer-hidden { width: 100%; padding: 12px 16px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); font-size: 15px; color: var(--color-text-tertiary); cursor: pointer; text-align: center; border: 0.5px dashed var(--color-border-secondary); transition: background 0.15s; user-select: none; }
+.answer-hidden:hover { background: var(--color-background-tertiary); }
+.answer-shown { width: 100%; padding: 12px 16px; background: #E1F5EE; border-radius: var(--border-radius-md); font-size: 17px; font-weight: 500; color: #0F6E56; text-align: center; border: 0.5px solid #5DCAA5; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { padding: 8px 20px; font-size: 14px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+.btn:hover { background: var(--color-background-secondary); }
+.btn:active { transform: scale(0.98); }
+.btn-ok { background: #E1F5EE; border-color: #5DCAA5; color: #0F6E56; }
+.btn-ok:hover { background: #9FE1CB; }
+.btn-ng { background: #FCEBEB; border-color: #F09595; color: #A32D2D; }
+.btn-ng:hover { background: #F7C1C1; }
+.btn-primary { background: #E6F1FB; border-color: #85B7EB; color: #185FA5; }
+.btn-primary:hover { background: #B5D4F4; }
+.judge-row { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--color-text-secondary); }
+.mini-btn { padding: 6px 14px; font-size: 13px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-primary); cursor: pointer; transition: all 0.15s; }
+.mini-btn:hover { background: var(--color-background-secondary); }
+.result-panel { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 2rem; text-align: center; }
+.result-score { font-size: 48px; font-weight: 500; color: #1D9E75; margin: 1rem 0 0.5rem; }
+.result-label { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+.score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 1.5rem 0; }
+.score-card { padding: 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); }
+.score-card-val { font-size: 22px; font-weight: 500; }
+.score-card-lbl { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+.ok-val { color: #0F6E56; }
+.ng-val { color: #A32D2D; }
+.skip-val { color: var(--color-text-secondary); }
+.shuffle-badge { font-size: 11px; padding: 2px 8px; border-radius: var(--border-radius-md); background: var(--color-background-secondary); color: var(--color-text-tertiary); border: 0.5px solid var(--color-border-tertiary); }
+</style>
+
+<div class="wrap">
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">新詳地理探求 第一章 地形 一問一答クイズ（56問）</h2>
+<div class="header">
+  <span class="title">第一章　地形　一問一答</span>
+  <div class="stats">
+    <span><span class="stat-val" id="cur">1</span> / <span id="tot">56</span></span>
+    <span>正解 <span class="stat-val ok-val" id="ok-cnt">0</span></span>
+    <span>不正解 <span class="stat-val ng-val" id="ng-cnt">0</span></span>
+  </div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+
+<div class="category-tabs" id="cat-tabs"></div>
+
+<div id="quiz-area"></div>
+</div>
+
+<script>
+const ALL = [
+  {c:"プレート・大地形", q:"地球表面を覆う十数枚の板状の岩盤を何というか", a:"プレート"},
+  {c:"プレート・大地形", q:"プレートが生まれる海底の大山脈を何というか", a:"海嶺"},
+  {c:"プレート・大地形", q:"プレートが沈み込む海底の細長い凹地を何というか", a:"海溝"},
+  {c:"プレート・大地形", q:"プレートの運動によって大陸が移動するという説を何というか", a:"プレートテクトニクス（大陸移動説）"},
+  {c:"プレート・大地形", q:"環太平洋地帯やアルプス＝ヒマラヤ地帯のような、地震・火山が多い地帯を何というか", a:"変動帯"},
+  {c:"プレート・大地形", q:"先カンブリア時代に形成され、安定した古い硬い岩盤からなる大地を何というか", a:"安定陸塊"},
+  {c:"プレート・大地形", q:"安定陸塊のうち、結晶質の岩石が露出した平原を何というか", a:"楯状地"},
+  {c:"プレート・大地形", q:"楯状地の上に水平な堆積岩が広がる地形を何というか", a:"卓状地"},
+  {c:"プレート・大地形", q:"古生代に造山運動を受けた山脈を何というか（例：アパラチア山脈・ウラル山脈）", a:"古期造山帯"},
+  {c:"プレート・大地形", q:"中生代〜新生代に造山運動を受けた山脈を何というか（例：アルプス山脈・ヒマラヤ山脈）", a:"新期造山帯"},
+  {c:"プレート・大地形", q:"大西洋の中央部を南北に走る海底山脈を何というか", a:"大西洋中央海嶺"},
+  {c:"プレート・大地形", q:"プレートの境界でマグマが上昇してできる火山列島を何というか", a:"島弧（弧状列島）"},
+
+  {c:"河川地形", q:"河川が山地から平野に出るところに土砂が堆積してできる扇形の地形を何というか", a:"扇状地"},
+  {c:"河川地形", q:"河川が海・湖に注ぐ河口付近に堆積してできる低平な地形を何というか", a:"三角州（デルタ）"},
+  {c:"河川地形", q:"河川の氾濫によって川沿いに形成される微高地を何というか", a:"自然堤防"},
+  {c:"河川地形", q:"自然堤防の背後に形成される低湿地を何というか", a:"後背湿地（氾濫原）"},
+  {c:"河川地形", q:"蛇行する川が切り離されてできる弓形の湖を何というか", a:"三日月湖（河跡湖）"},
+  {c:"河川地形", q:"河川が山地を深く侵食してできたV字形の谷を何というか", a:"V字谷"},
+  {c:"河川地形", q:"段丘面と急崖からなる階段状の地形を何というか", a:"河岸段丘"},
+  {c:"河川地形", q:"軟らかい地層が浸食されて傾斜面と急崖からなるなだらかな地形を何というか", a:"ケスタ"},
+  {c:"河川地形", q:"扇状地・三角州・自然堤防などからなる低平な堆積地形をまとめて何というか", a:"沖積低地"},
+
+  {c:"海岸地形", q:"山地が沈降または海面上昇によって谷が入り江になった複雑な海岸を何というか", a:"リアス海岸"},
+  {c:"海岸地形", q:"氷河が侵食したU字谷に海水が浸入してできた細長い入り江を何というか", a:"フィヨルド"},
+  {c:"海岸地形", q:"沿岸流によって堆積した砂礫が湾口をふさいでできた地形を何というか", a:"砂州"},
+  {c:"海岸地形", q:"砂州に囲まれた内側にできる湖を何というか", a:"潟湖（ラグーン）"},
+  {c:"海岸地形", q:"波の侵食によって形成される平坦な岩の面を何というか", a:"波食台"},
+  {c:"海岸地形", q:"陸地に接して形成されるサンゴ礁を何というか", a:"裾礁"},
+  {c:"海岸地形", q:"陸地から離れてラグーンを挟んで存在するサンゴ礁を何というか", a:"堡礁"},
+  {c:"海岸地形", q:"環状に発達したサンゴ礁（ラグーンを囲む環礁）を何というか", a:"環礁（アトール）"},
+  {c:"海岸地形", q:"海岸線が土砂の堆積によって前進することを何というか", a:"海岸の前進（堆積海岸）"},
+
+  {c:"氷河地形", q:"氷河に侵食されたU字形の谷を何というか", a:"U字谷（氷食谷）"},
+  {c:"氷河地形", q:"氷河の侵食でできた半円形のくぼ地を何というか", a:"カール（圏谷）"},
+  {c:"氷河地形", q:"カールに挟まれた鋭い尾根を何というか", a:"アレート（鋭稜）"},
+  {c:"氷河地形", q:"複数のカールに削られてできる鋭いピークを何というか", a:"ホルン（角峰）"},
+  {c:"氷河地形", q:"氷河が運搬・堆積させた土砂の堤を何というか", a:"モレーン（堆石）"},
+  {c:"氷河地形", q:"氷河の侵食・堆積によって形成された細長い湖を何というか", a:"氷河湖"},
+  {c:"氷河地形", q:"氷期に大陸氷河に覆われ、後退後に残った丘状の堆積物を何というか", a:"ドラムリン"},
+
+  {c:"乾燥地形", q:"風によって砂が堆積した砂丘の連なりを何というか（アラビア語で砂砂漠）", a:"エルグ（砂砂漠）"},
+  {c:"乾燥地形", q:"岩石や礫が広がる砂漠地形を何というか", a:"ハマダ（岩石砂漠）・レグ（礫砂漠）"},
+  {c:"乾燥地形", q:"乾燥地域で雨のときだけ水が流れる涸れ川を何というか", a:"ワジ（涸れ川）"},
+  {c:"乾燥地形", q:"砂漠の中で地下水が湧き、植物が育つ場所を何というか", a:"オアシス"},
+  {c:"乾燥地形", q:"風食によってできたキノコ状の岩を何というか", a:"キノコ岩"},
+  {c:"乾燥地形", q:"三日月形の砂丘を何というか", a:"バルハン"},
+  {c:"乾燥地形", q:"乾燥地域で一時的な流水が堆積した平坦地を何というか", a:"プラヤ（干上がった湖底）"},
+
+  {c:"カルスト地形", q:"石灰岩が雨水・地下水に溶食されてできた地形を何というか", a:"カルスト地形"},
+  {c:"カルスト地形", q:"カルスト地形に見られるすり鉢状のくぼ地を何というか", a:"ドリーネ"},
+  {c:"カルスト地形", q:"ドリーネが複数合体した大きなくぼ地を何というか", a:"ウバーレ・ポリエ"},
+  {c:"カルスト地形", q:"石灰洞の天井から垂れ下がるつらら状の岩を何というか", a:"鍾乳石（スタラクタイト）"},
+  {c:"カルスト地形", q:"石灰洞の床から上へ伸びる岩柱を何というか", a:"石筍（スタラグマイト）"},
+  {c:"カルスト地形", q:"カルスト地形が発達しているスロベニアの地名から付いた名称は何か", a:"カルスト（クルスト地方）"},
+
+  {c:"火山地形", q:"火山の山頂部が陥没・爆発してできた大きなくぼ地を何というか", a:"カルデラ"},
+  {c:"火山地形", q:"カルデラに水がたまった湖を何というか", a:"カルデラ湖"},
+  {c:"火山地形", q:"粘性の低い溶岩が広がって形成した傾斜の緩い火山を何というか", a:"楯状火山"},
+  {c:"火山地形", q:"溶岩と火山灰が交互に積み重なった急傾斜の円錐形火山を何というか", a:"成層火山"},
+  {c:"火山地形", q:"火砕流の堆積物が固まってできた台地を何というか（鹿児島の例）", a:"火砕流台地（シラス台地）"},
+  {c:"火山地形", q:"溶岩が広域に流れ出て形成した平坦な台地を何というか", a:"溶岩台地"},
+
+  {c:"その他の地形", q:"断層運動によって形成された急崖を何というか", a:"断層崖"},
+  {c:"その他の地形", q:"断層によって両側が隆起し中央が落ち込んだ谷状の地形を何というか", a:"地溝（グラーベン）"},
+  {c:"その他の地形", q:"アフリカ大陸に見られる大地溝帯を英語で何というか", a:"グレートリフトバレー（大地溝帯）"},
+  {c:"その他の地形", q:"侵食が進んで平野に孤立して残った丘を何というか", a:"残丘（モナドノック）"},
+  {c:"その他の地形", q:"硬い岩石が侵食から残った急崖をもつ台地状地形を何というか", a:"メサ"},
+  {c:"その他の地形", q:"メサがさらに侵食されて細くなった塔状の地形を何というか", a:"ビュート"},
+];
+
+const CATS = [...new Set(ALL.map(q => q.c))];
+let filtered = [...ALL];
+let activecat = "全問";
+let order = [];
+let cur = 0;
+let shown = false;
+let okSet = new Set(), ngSet = new Set();
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function setCategory(cat) {
+  activecat = cat;
+  filtered = cat === "全問" ? [...ALL] : ALL.filter(q => q.c === cat);
+  okSet = new Set(); ngSet = new Set();
+  order = filtered.map((_,i) => i);
+  cur = 0; shown = false;
+  renderTabs();
+  renderCard();
+}
+
+function renderTabs() {
+  const el = document.getElementById("cat-tabs");
+  const cats = ["全問", ...CATS];
+  el.innerHTML = cats.map(c =>
+    `<button class="tab${c===activecat?" active":""}" onclick="setCategory('${c}')">${c}</button>`
+  ).join("");
+}
+
+function renderCard() {
+  const area = document.getElementById("quiz-area");
+  const total = order.length;
+  document.getElementById("tot").textContent = total;
+  document.getElementById("ok-cnt").textContent = okSet.size;
+  document.getElementById("ng-cnt").textContent = ngSet.size;
+
+  if (cur >= total) {
+    const pct = total > 0 ? Math.round(okSet.size / total * 100) : 0;
+    area.innerHTML = `<div class="result-panel">
+      <div style="font-size:14px;color:var(--color-text-secondary);margin-bottom:0.5rem">全問終了</div>
+      <div class="result-score">${pct}%</div>
+      <div class="result-label">${okSet.size} / ${total} 正解</div>
+      <div class="score-grid">
+        <div class="score-card"><div class="score-card-val ok-val">${okSet.size}</div><div class="score-card-lbl">正解</div></div>
+        <div class="score-card"><div class="score-card-val ng-val">${ngSet.size}</div><div class="score-card-lbl">不正解</div></div>
+        <div class="score-card"><div class="score-card-val skip-val">${total - okSet.size - ngSet.size}</div><div class="score-card-lbl">スキップ</div></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="setCategory('${activecat}')"><i class="ti ti-refresh" aria-hidden="true"></i> もう一度</button>
+        <button class="btn" onclick="retryNG()"><i class="ti ti-x" aria-hidden="true"></i> 不正解のみやり直す</button>
+      </div>
+    </div>`;
+    document.getElementById("prog").style.width = "100%";
+    document.getElementById("cur").textContent = total;
+    return;
+  }
+
+  const qi = order[cur];
+  const q = filtered[qi];
+  const pct = Math.round((cur / order.length) * 100);
+  document.getElementById("prog").style.width = pct + "%";
+  document.getElementById("cur").textContent = cur + 1;
+
+  const answerHtml = shown
+    ? `<div class="answer-shown">${q.a}</div>`
+    : `<div class="answer-hidden" onclick="revealAnswer()" role="button" tabindex="0">タップして答えを表示</div>`;
+
+  const judgeHtml = shown
+    ? `<div class="judge-row" style="margin-top:12px">
+        <span>判定：</span>
+        <button class="mini-btn btn-ok" onclick="judge(true)"><i class="ti ti-check" aria-hidden="true"></i> 正解</button>
+        <button class="mini-btn btn-ng" onclick="judge(false)"><i class="ti ti-x" aria-hidden="true"></i> 不正解</button>
+        <button class="mini-btn" onclick="skip()">スキップ</button>
+       </div>`
+    : `<div class="judge-row" style="margin-top:12px">
+        <button class="btn" style="margin-left:auto" onclick="skip()">スキップ <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+       </div>`;
+
+  area.innerHTML = `<div class="card">
+    <div>
+      <div class="q-meta">
+        <span class="q-num">Q${cur+1} / ${order.length}</span>
+        <span class="q-cat">${q.c}</span>
+      </div>
+      <div class="q-text">${q.q}</div>
+    </div>
+    <div>
+      <div class="answer-area">${answerHtml}</div>
+      ${judgeHtml}
+    </div>
+  </div>`;
+
+  const hidden = area.querySelector(".answer-hidden");
+  if (hidden) {
+    hidden.addEventListener("keydown", e => { if(e.key==="Enter"||e.key===" ") revealAnswer(); });
+  }
+}
+
+function revealAnswer() { shown = true; renderCard(); }
+
+function judge(ok) {
+  const qi = order[cur];
+  if (ok) { okSet.add(qi); ngSet.delete(qi); }
+  else { ngSet.add(qi); okSet.delete(qi); }
+  cur++; shown = false; renderCard();
+  document.getElementById("ok-cnt").textContent = okSet.size;
+  document.getElementById("ng-cnt").textContent = ngSet.size;
+}
+
+function skip() { cur++; shown = false; renderCard(); }
+
+function retryNG() {
+  if (ngSet.size === 0) { setCategory(activecat); return; }
+  order = shuffle([...ngSet]);
+  okSet = new Set(); ngSet = new Set();
+  cur = 0; shown = false; renderCard();
+}
+
+renderTabs();
+order = filtered.map((_,i) => i);
+renderCard();
+</script>
