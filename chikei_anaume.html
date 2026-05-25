@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>地形の用語 穴埋め問題</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hiragino Sans','Meiryo',sans-serif;background:#f7f6f2;color:#1a1a1a;min-height:100vh}
+.header{background:#1a1a1a;color:#fff;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.header h1{font-size:16px;font-weight:600;letter-spacing:.05em}
+.header-right{display:flex;align-items:center;gap:8px}
+.shuffle-btn{font-size:12px;padding:5px 12px;border:1px solid #555;border-radius:6px;background:transparent;color:#fff;cursor:pointer}
+.shuffle-btn:hover{background:#333}
+.cats{display:flex;gap:6px;flex-wrap:wrap;padding:.75rem 1.5rem;background:#fff;border-bottom:1px solid #e8e6e0}
+.cb{font-size:12px;padding:4px 10px;border:1px solid #ddd;border-radius:20px;background:#fff;color:#555;cursor:pointer;transition:all .15s}
+.cb.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.prog-wrap{padding:.5rem 1.5rem;background:#fff;border-bottom:1px solid #e8e6e0}
+.prog-bg{height:3px;background:#e8e6e0;border-radius:2px}
+.prog-fill{height:3px;background:#2d6a4f;border-radius:2px;transition:width .3s}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:.75rem 1.5rem;background:#fff;border-bottom:1px solid #e8e6e0}
+.stat{background:#f7f6f2;border-radius:8px;padding:.5rem;text-align:center}
+.sn{font-size:22px;font-weight:700}
+.sl{font-size:11px;color:#888;margin-top:1px}
+.main{padding:1rem 1.5rem;max-width:800px;margin:0 auto}
+.qcard{background:#fff;border:1px solid #e8e6e0;border-radius:10px;padding:1.25rem;margin-bottom:.75rem}
+.qtag{font-size:11px;color:#aaa;letter-spacing:.05em;margin-bottom:.5rem;font-weight:600;text-transform:uppercase}
+.qt{font-size:14px;line-height:2.4;color:#1a1a1a}
+.qi{font-size:14px;padding:3px 8px;border:none;border-bottom:2px solid #ccc;background:transparent;color:#1a1a1a;width:130px;text-align:center;outline:none;transition:border-color .15s}
+.qi:focus{border-color:#1a1a1a}
+.qi.ok{border-color:#2d6a4f;color:#2d6a4f;background:#f0fff8}
+.qi.ng{border-color:#c0392b;color:#c0392b;background:#fff5f5}
+.fb{font-size:12px;margin-top:4px;min-height:16px}
+.fb.ok{color:#2d6a4f}.fb.ng{color:#c0392b}
+.hbtn{font-size:11px;color:#aaa;cursor:pointer;margin-top:4px;display:inline-block;border:none;background:none;padding:0;text-decoration:underline}
+.hbtn:hover{color:#555}
+.hbox{font-size:12px;color:#555;background:#f7f6f2;border-radius:6px;padding:4px 8px;margin-top:4px;display:none}
+.brow{display:flex;gap:8px;margin-bottom:.75rem;flex-wrap:wrap;padding:0 1.5rem;max-width:800px;margin-left:auto;margin-right:auto}
+.btn{padding:8px 18px;border:1px solid #ccc;border-radius:6px;background:#fff;color:#1a1a1a;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn:hover{background:#f0f0f0}
+.btn.main-btn{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.btn.main-btn:hover{background:#333}
+.nav{display:flex;gap:8px;align-items:center;justify-content:center;padding:.75rem 1.5rem}
+.nc{font-size:13px;color:#888;min-width:90px;text-align:center}
+.comp{background:#fff;border:1px solid #e8e6e0;border-radius:10px;padding:2rem;text-align:center;margin:.75rem 1.5rem;max-width:800px;margin-left:auto;margin-right:auto;display:none}
+.comp h3{font-size:18px;font-weight:700;margin-bottom:.5rem}
+.sc{font-size:42px;font-weight:700;color:#2d6a4f;margin:.5rem 0}
+.comp p{font-size:13px;color:#888;margin-bottom:1rem}
+.comp-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>地形の用語 穴埋め問題</h1>
+  <div class="header-right">
+    <button class="shuffle-btn" onclick="doShuffle()">シャッフル</button>
+  </div>
+</div>
+<div class="cats" id="cats"></div>
+<div class="prog-wrap"><div class="prog-bg"><div class="prog-fill" id="pf" style="width:0%"></div></div></div>
+<div class="stats">
+  <div class="stat"><div class="sn" id="stT">0</div><div class="sl">総問</div></div>
+  <div class="stat"><div class="sn" style="color:#2d6a4f" id="stO">0</div><div class="sl">正解</div></div>
+  <div class="stat"><div class="sn" style="color:#c0392b" id="stN">0</div><div class="sl">不正解</div></div>
+</div>
+<div id="qa" class="main"></div>
+<div class="brow">
+  <button class="btn main-btn" onclick="checkAll()">採点する</button>
+  <button class="btn" onclick="showAll()">答えを見る</button>
+</div>
+<div class="nav">
+  <button class="btn" onclick="go(-1)">← 前のページ</button>
+  <span class="nc" id="nc"></span>
+  <button class="btn" onclick="go(1)">次のページ →</button>
+</div>
+<div class="comp" id="comp">
+  <h3>完了！</h3>
+  <div class="sc" id="sc"></div>
+  <p>不正解の問題だけ再挑戦することもできます</p>
+  <div class="comp-btns">
+    <button class="btn" onclick="restart(false)">全部やり直す</button>
+    <button class="btn" style="color:#c0392b;border-color:#c0392b" onclick="restart(true)">不正解のみ</button>
+  </div>
+</div>
+<script>
+const PER=5;
+const QS=[
+{c:"地形の成因",q:"ヒマラヤ山脈のような高く険しい山脈は，主に地球内部からの力によって地表が押し上げられる【】により形成される。",a:"地殻変動",r:"ちかくへんどう",h:"地球内部の熱が動力源となり地殻が押し上げられる現象"},
+{c:"地形の成因",q:"地殻変動や火山活動など，地球内部からの力の総称を【】という。",a:"内的営力",r:"ないてきえいりょく",h:"「内側からの営みの力」"},
+{c:"地形の成因",q:"岩石が温度変化・水・生物などの作用で崩れやすくなる現象を【】という。",a:"風化",r:"ふうか",h:"侵食の前段階として起こる"},
+{c:"地形の成因",q:"河川や氷河などが地表を削り取る作用を【】といい，深い谷や険しい山々をつくる。",a:"侵食",r:"しんしょく",h:"「削り取る」という意味"},
+{c:"地形の成因",q:"風化・侵食・運搬・堆積など，主に太陽エネルギーを源とする地球外部からの力の総称を【】という。",a:"外的営力",r:"がいてきえいりょく",h:"「外側からの営みの力」"},
+{c:"大地形",q:"大陸沿いの海底に広がる，傾斜が緩やかな浅い海底地形を【】という。",a:"大陸棚",r:"たいりくだな",h:"大陸の端にある棚のようなもの"},
+{c:"大地形",q:"海底にある大山脈で，広がる境界に位置しマントルが湧き出してできる地形を【】という。",a:"海嶺",r:"かいれい",h:"海底の「山脈」"},
+{c:"大地形",q:"水深6000m以上の細長い深い溝で，狭まる境界に形成される地形を【】という。",a:"海溝",r:"かいこう",h:"海底の深い「溝」"},
+{c:"大地形",q:"巨大山脈のように内的営力が広域に作用してつくられる大規模な地形を【】とよぶ。",a:"大地形",r:"だいちけい",h:"スケールの大きな地形"},
+{c:"プレートテクトニクス",q:"地震・火山活動が活発で，活断層や火山が帯状に分布する地域を【】という。",a:"変動帯",r:"へんどうたい",h:"プレートの境界沿いに分布"},
+{c:"プレートテクトニクス",q:"地震・火山活動が不活発な，プレートの内側の大部分を占める地域を【】という。",a:"安定地域",r:"あんていちいき",h:"「安定した」地域"},
+{c:"プレートテクトニクス",q:"地球表面を覆う厚さ100km程度の固い岩盤を【】という。十数枚に分かれ，水平方向に移動している。",a:"プレート",r:"ぷれーと",h:"英語で「板」を意味する"},
+{c:"プレートテクトニクス",q:"プレートの運動を基に地殻変動・地震・火山活動などを説明する考え方を【】という。",a:"プレートテクトニクス",r:"ぷれーとてくとにくす",h:"「テクトニクス」は「構造」の意味"},
+{c:"プレートテクトニクス",q:"隣り合うプレートが互いに遠ざかる境界を【】といい，主に海底に位置し海嶺を形成する。",a:"広がる境界",r:"ひろがるさかい",h:"プレートが「離れていく」境界"},
+{c:"プレートテクトニクス",q:"隣り合うプレートが近づき押し合う境界を【】といい，沈み込み帯と衝突帯に分かれる。",a:"狭まる境界",r:"せばまるさかい",h:"プレートが「近づく」境界"},
+{c:"プレートテクトニクス",q:"隣り合うプレートが水平方向にすれ違う境界を【】といい，トランスフォーム断層ともよばれる。",a:"ずれる境界",r:"ずれるさかい",h:"プレートが横に「ずれる」境界"},
+{c:"プレートテクトニクス",q:"海底を構成するプレートを【】という。密度が高く，狭まる境界では大陸プレートの下に沈み込む。",a:"海洋プレート",r:"かいようぷれーと",h:"「海」の下にあるプレート"},
+{c:"プレートテクトニクス",q:"大陸を構成するプレートを【】という。密度が低く，海洋プレートより上に位置する。",a:"大陸プレート",r:"たいりくぷれーと",h:"「大陸」の下にあるプレート"},
+{c:"プレートテクトニクス",q:"海洋プレートが大陸プレートの下に斜めに沈み込む境界を【】という。海溝や島弧が形成される。",a:"沈み込み帯",r:"しずみこみたい",h:"プレートが「沈んでいく」帯"},
+{c:"プレートテクトニクス",q:"大陸プレートどうしが衝突している境界を【】という。ヒマラヤ山脈などが形成される。",a:"衝突帯",r:"しょうとつたい",h:"プレートが「ぶつかる」帯"},
+{c:"プレートテクトニクス",q:"沈み込み帯と平行に形成される弧状の島々を【】という。",a:"弧状列島（島弧）",r:"こじょうれっとう",h:"弧を描く形に並ぶ島々"},
+{c:"プレートテクトニクス",q:"衝突帯で大陸プレートどうしが衝突し地層が押し曲げられてできた山脈を【】という。",a:"褶曲山脈",r:"しゅうきょくさんみゃく",h:"地層が波状に「褶曲」した山脈"},
+{c:"プレートテクトニクス",q:"ウェゲナーが提唱した，超大陸パンゲアが分裂・移動して現在の六大陸ができたとする説を【】という。",a:"大陸移動説",r:"たいりくいどうせつ",h:"大陸が「移動した」という説"},
+{c:"地震・火山",q:"地下の岩盤が割れ，割れた面に沿ってずれ動いている部分を【】という。",a:"断層",r:"だんそう",h:"地層が「断ち切られた」もの"},
+{c:"地震・火山",q:"過去数十万年間に繰り返し活動し，将来も活動する可能性が高い断層を【】という。",a:"活断層",r:"かつだんそう",h:"「活きている」断層"},
+{c:"地震・火山",q:"海洋プレートが沈み込む境界で発生し，津波を引き起こすことがある地震を【】という。",a:"海溝型地震",r:"かいこうがたじしん",h:"海溝付近で起きる地震"},
+{c:"地震・火山",q:"海底の地殻変動により発生する大規模な波を【】という。",a:"津波",r:"つなみ",h:"地震に伴い発生する巨大な波"},
+{c:"地震・火山",q:"内陸部の活断層がずれ動いて発生し，震源近くの都市が甚大な被害を受けることがある地震を【】という。",a:"直下型地震",r:"ちょっかがたじしん",h:"都市の「真下」で起きる地震"},
+{c:"地震・火山",q:"噴火によって放出された溶岩が広範囲に流れ固まった台地状の地形を【】という。",a:"溶岩台地",r:"ようがんだいち",h:"溶岩が広がった「台地」"},
+{c:"地震・火山",q:"大規模な噴火後に地表が陥没してできた直径1km以上の円形の凹地を【】という。",a:"カルデラ",r:"かるでら",h:"スペイン語で「鍋」の意味"},
+{c:"地震・火山",q:"粘性の大きい流紋岩質の溶岩が噴き出して盛り上がった形の火山を【】という。",a:"溶岩円頂丘（溶岩ドーム）",r:"ようがんえんちょうきゅう",h:"丸く盛り上がったドーム型"},
+{c:"地震・火山",q:"粘性の小さい玄武岩質の溶岩が広域に流れてできた，傾斜の緩やかな火山を【】という。ハワイが代表例。",a:"楯状火山",r:"たてじょうかざん",h:"盾（たて）のように平らな形"},
+{c:"地震・火山",q:"繰り返す噴出で溶岩流・火山灰・火砕物が積み重なってできた円錐形の火山を【】という。富士山が代表例。",a:"成層火山",r:"せいそうかざん",h:"何層にも積み重なった火山"},
+{c:"地震・火山",q:"高温のガスと火山噴出物が混合して高速で山麓を流れ下る現象を【】という。",a:"火砕流",r:"かさいりゅう",h:"火山の「砕けた物」が「流れる」"},
+{c:"安定地域の地形",q:"古生代以降，地殻変動がほとんど起こらない最も古い陸地を【】といい，楯状地と卓状地に区分される。",a:"安定陸塊",r:"あんていりっかい",h:"「安定した」「陸の塊」"},
+{c:"安定地域の地形",q:"先カンブリア時代の非常に古い地層が広く露出している平坦な地を【】という。カナダ・北ヨーロッパなどに多い。",a:"楯状地",r:"たてじょうち",h:"盾のように古い地層が露出した土地"},
+{c:"安定地域の地形",q:"先カンブリア時代の地層を覆って古生代・中生代の地層がほぼ水平に堆積した広大な平野を【】という。",a:"卓状地",r:"たくじょうち",h:"「卓（テーブル）」のように水平な地層"},
+{c:"安定地域の地形",q:"楯状地・卓状地で長期にわたる侵食によって形成された緩やかな平野を【】という。",a:"侵食平野",r:"しんしょくへいや",h:"「侵食」によってできた「平野」"},
+{c:"安定地域の地形",q:"長期間の侵食により地表がほぼ平坦化した地形を【】という。硬い岩石が残丘として残ることがある。",a:"準平原",r:"じゅんへいげん",h:"平原に「準じる」ほど平らな地形"},
+{c:"安定地域の地形",q:"侵食から取り残された硬い岩石の丘を【】という。ウルル（エアーズロック）が代表例。",a:"残丘（モナドノック）",r:"ざんきゅう",h:"「残された丘」"},
+{c:"安定地域の地形",q:"卓状地で水平な地層が侵食されてテーブル状に取り残された地形を【】という。",a:"メサ",r:"めさ",h:"スペイン語で「テーブル」の意味"},
+{c:"安定地域の地形",q:"メサがさらに侵食されて縮小し，塔状に残った地形を【】という。",a:"ビュート",r:"びゅーと",h:"メサよりさらに小さい塔状"},
+{c:"安定地域の地形",q:"卓状地で硬軟の地層が交互に侵食されて急斜面と緩斜面が組み合わさった地形を【】という。パリ盆地が典型例。",a:"ケスタ",r:"けすた",h:"急斜面と緩斜面が交互に現れる地形"},
+{c:"安定地域の地形",q:"卓状地やケスタのように地層の構造がほぼそのまま地形に反映されている平野を【】という。",a:"構造平野",r:"こうぞうへいや",h:"「構造」が地形に現れた「平野」"},
+{c:"造山帯・地下資源",q:"プレートの運動に伴い，大陸地殻が形成・変化していくプロセスを【】という。",a:"造山運動",r:"ぞうざんうんどう",h:"山を「造る」運動"},
+{c:"造山帯・地下資源",q:"造山運動が活発だった地域の総称を【】といい，古期と新期に分類される。",a:"造山帯",r:"ぞうざんたい",h:"山ができた地帯"},
+{c:"造山帯・地下資源",q:"約2.5億年前ごろに隆起をほぼ終えた造山帯を【】という。現在は低くなだらかで，石炭が多く分布する。",a:"古期造山帯",r:"こきぞうざんたい",h:"「古い時代」の造山帯"},
+{c:"造山帯・地下資源",q:"中生代以降の造山運動によって形成された造山帯を【】という。現在も活発な変動帯と一致し険しい山脈が多い。",a:"新期造山帯",r:"しんきぞうざんたい",h:"「新しい時代」の造山帯"},
+{c:"造山帯・地下資源",q:"ユーラシア大陸南部をほぼ東西に走る新期造山帯を【】という。アルプス・ヒマラヤ・チベット高原などを含む。",a:"アルプス＝ヒマラヤ造山帯",r:"あるぷす＝ひまらやぞうざんたい",h:"二つの山脈名を組み合わせた造山帯"},
+{c:"造山帯・地下資源",q:"太平洋を取り巻く新期造山帯を【】という。ロッキー・アンデス・日本列島などを含む。",a:"環太平洋造山帯",r:"かんたいへいようぞうざんたい",h:"太平洋を「環（とりまく）」造山帯"},
+{c:"造山帯・地下資源",q:"先カンブリア時代に形成された鉱床で，主に安定陸塊に分布する金属資源を【】という。",a:"鉄鉱石",r:"てっこうせき",h:"製鉄に欠かせない鉱石"},
+{c:"造山帯・地下資源",q:"古生代中頃の森林が湿地で泥炭層となり形成された化石燃料を【】という。古期造山帯に多く分布する。",a:"石炭",r:"せきたん",h:"黒い固体の化石燃料"},
+{c:"造山帯・地下資源",q:"中生代に海洋プランクトンの遺骸が堆積して形成された液体の化石燃料を【】という。背斜構造に集積しやすい。",a:"原油",r:"げんゆ",h:"液体の化石燃料"},
+{c:"造山帯・地下資源",q:"地層が褶曲して山型になった構造を【】という。原油が集まりやすく，油田が形成されることが多い。",a:"背斜構造",r:"はいしゃこうぞう",h:"地層が「山型」に曲がった構造"},
+];
+
+let filtered=[...QS];
+let page=0;
+let res={};
+let vals={};
+let acat='すべて';
+const cats=['すべて',...new Set(QS.map(q=>q.c))];
+
+function renderCats(){
+  document.getElementById('cats').innerHTML=cats.map(c=>`<button class="cb${c===acat?' on':''}" onclick="setC('${c}')">${c}</button>`).join('');
+}
+function setC(c){
+  acat=c;filtered=c==='すべて'?[...QS]:QS.filter(q=>q.c===c);
+  page=0;res={};vals={};renderCats();render();upStats();
+}
+function doShuffle(){
+  for(let i=filtered.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[filtered[i],filtered[j]]=[filtered[j],filtered[i]];}
+  page=0;res={};vals={};render();upStats();
+}
+function norm(s){return s.replace(/[（(][^）)]*[）)]/g,'').replace(/[\s　・＝=]/g,'').toLowerCase();}
+function render(){
+  document.getElementById('comp').style.display='none';
+  const total=filtered.length;
+  const pages=Math.ceil(total/PER);
+  const s=page*PER;
+  const items=filtered.slice(s,s+PER);
+  document.getElementById('nc').textContent=(page+1)+' / '+pages+' ページ';
+  let html='';
+  items.forEach((q,i)=>{
+    const gi=s+i;
+    const r=res[gi];
+    const dis=r!==undefined;
+    const cls=r===true?'ok':r===false?'ng':'';
+    const v=r===true?q.a:(vals[gi]||'');
+    html+=`<div class="qcard">
+<div class="qtag">${q.c}</div>
+<div class="qt">${q.q.replace('【】',`<input class="qi ${cls}" id="i${gi}" value="${v.replace(/"/g,'&quot;')}" ${dis?'disabled':''} placeholder="用語を入力" onkeydown="if(event.key==='Enter')chk(${gi})">`)}</div>
+${r===false?`<div class="fb ng">✗ 正解：${q.a}（${q.r}）</div>`:r===true?`<div class="fb ok">✓ 正解（${q.r}）</div>`:''}
+${!dis?`<button class="hbtn" onclick="th(${gi})">ヒントを見る</button><div class="hbox" id="h${gi}">${q.h}</div>`:''}
+</div>`;
+  });
+  document.getElementById('qa').innerHTML=html;
+  upStats();
+}
+function sv(gi){const el=document.getElementById('i'+gi);if(el)vals[gi]=el.value;return(vals[gi]||'').trim();}
+function chk(gi){
+  const q=filtered[gi];const v=sv(gi);if(!v)return;
+  res[gi]=norm(v)===norm(q.a)||v===q.a;render();
+}
+function checkAll(){
+  const s=page*PER;filtered.slice(s,s+PER).forEach((_,i)=>{const gi=s+i;if(res[gi]===undefined)chk(gi);});render();
+}
+function showAll(){
+  const s=page*PER;filtered.slice(s,s+PER).forEach((_,i)=>{const gi=s+i;if(res[gi]===undefined)res[gi]=false;});render();
+}
+function th(gi){const el=document.getElementById('h'+gi);if(el)el.style.display=el.style.display==='block'?'none':'block';}
+function upStats(){
+  const ok=Object.values(res).filter(v=>v).length;
+  const ng=Object.values(res).filter(v=>v===false).length;
+  document.getElementById('stT').textContent=filtered.length;
+  document.getElementById('stO').textContent=ok;
+  document.getElementById('stN').textContent=ng;
+  const done=Object.keys(res).length;
+  document.getElementById('pf').style.width=(done/filtered.length*100)+'%';
+  if(done===filtered.length&&filtered.length>0){
+    document.getElementById('comp').style.display='block';
+    document.getElementById('sc').textContent=ok+' / '+filtered.length+' 正解';
+  }
+}
+function go(d){
+  const pages=Math.ceil(filtered.length/PER);
+  page=Math.max(0,Math.min(pages-1,page+d));render();
+}
+function restart(ngOnly){
+  if(ngOnly){
+    const base=acat==='すべて'?[...QS]:QS.filter(q=>q.c===acat);
+    const idxs=Object.entries(res).filter(([,v])=>!v).map(([k])=>+k);
+    filtered=idxs.length?idxs.map(i=>filtered[i]):base;
+  } else {
+    filtered=acat==='すべて'?[...QS]:QS.filter(q=>q.c===acat);
+  }
+  page=0;res={};vals={};render();upStats();
+}
+renderCats();render();
+</script>
+</body>
+</html>
