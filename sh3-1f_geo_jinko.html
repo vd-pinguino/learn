@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>世界の人口 学習ツール (p166-177)</title>
+<style>
+:root{
+  --bg:#faf9f6; --card:#ffffff; --border:#e3e0d8; --text:#2c2c2a; --text2:#6b6a64;
+  --accent:#0c447c; --accent-bg:#e6f1fb; --good:#085041; --good-bg:#e1f5ee;
+  --bad:#791f1f; --bad-bg:#fcebeb;
+}
+*{box-sizing:border-box;}
+body{font-family:"Hiragino Sans","Yu Gothic",sans-serif;background:var(--bg);color:var(--text);max-width:720px;margin:0 auto;padding:24px 16px 60px;line-height:1.7;}
+h1{font-size:19px;font-weight:600;margin:0 0 4px;}
+p.sub{color:var(--text2);font-size:13px;margin:0 0 20px;}
+.nav{display:flex;gap:8px;margin-bottom:20px;position:sticky;top:0;background:var(--bg);padding:8px 0;}
+.nav button{flex:1;padding:10px 4px;font-size:13px;border-radius:8px;background:var(--card);border:1px solid var(--border);cursor:pointer;color:var(--text);}
+.nav button.active{background:var(--text);color:#fff;border-color:var(--text);}
+.panel{display:none;}
+.panel.active{display:block;}
+.step{border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;background:var(--card);}
+.step-head{padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--accent-bg);color:var(--accent);font-size:12px;font-weight:600;margin-right:8px;flex-shrink:0;}
+.step-title{font-weight:600;font-size:14px;}
+.step-sub{font-size:12px;color:var(--text2);margin-left:30px;}
+.step-body{display:none;padding:0 14px 14px 44px;font-size:13px;color:var(--text2);}
+.step-body.open{display:block;}
+.chip{display:inline-block;font-size:12px;padding:3px 10px;margin:4px 6px 0 0;border-radius:999px;background:var(--bg);border:1px solid var(--border);}
+.arrow{text-align:center;color:#bbb;font-size:14px;margin:-2px 0 6px;}
+.toprow{display:flex;gap:8px;align-items:center;margin-bottom:14px;}
+select,button{font-size:13px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;}
+.flash{border:1px solid var(--border);border-radius:12px;min-height:150px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer;background:var(--card);}
+.flash .term{font-size:18px;font-weight:600;}
+.flash .def{font-size:14px;color:var(--text2);}
+.cardnav{display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+.hint{font-size:12px;color:#999;text-align:center;margin-top:10px;}
+.qbox{border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px;min-height:60px;display:flex;align-items:center;font-size:14px;background:var(--card);}
+.qopt{display:block;width:100%;text-align:left;padding:12px 14px;margin-bottom:8px;border-radius:8px;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:14px;color:var(--text);}
+.qopt.correct{background:var(--good-bg);border-color:var(--good);color:var(--good);}
+.qopt.wrong{background:var(--bad-bg);border-color:var(--bad);color:var(--bad);}
+.scorebar{display:flex;justify-content:space-between;margin-bottom:12px;font-size:13px;color:var(--text2);}
+#quiz-next{display:none;width:100%;margin-top:6px;padding:12px;}
+</style>
+</head>
+<body>
+<h1>世界の人口 学習ツール</h1>
+<p class="sub">教科書 p166〜177「人口」範囲の太字・重要用語</p>
+
+<div class="nav">
+<button id="nav-flow" onclick="showTab('flow')">流れで理解</button>
+<button id="nav-cards" onclick="showTab('cards')">暗記カード</button>
+<button id="nav-quiz" onclick="showTab('quiz')">クイズ</button>
+</div>
+
+<div id="panel-flow" class="panel"></div>
+
+<div id="panel-cards" class="panel">
+<div class="toprow">
+<select id="cat-filter" onchange="resetDeck()" style="flex:1;"><option value="all">すべてのカテゴリ</option></select>
+<button onclick="shuffleDeck()">シャッフル</button>
+</div>
+<div class="flash" id="flash-card" onclick="flipCard()"></div>
+<div class="cardnav">
+<button onclick="prevCard()">‹ 前</button>
+<span id="card-counter" style="font-size:13px;color:var(--text2);"></span>
+<button onclick="nextCard()">次 ›</button>
+</div>
+<p class="hint">カードをクリックすると用語と意味が入れ替わります</p>
+</div>
+
+<div id="panel-quiz" class="panel">
+<div class="scorebar">
+<span id="quiz-score">正解 0 / 出題 0</span>
+<button onclick="restartQuiz()">やり直す</button>
+</div>
+<div class="qbox" id="quiz-question"></div>
+<div id="quiz-options"></div>
+<button id="quiz-next" onclick="nextQuestion()">次の問題 ›</button>
+</div>
+
+<script>
+var TERMS=[
+{t:"エクメーネ",d:"人類が居住している地域のこと",c:"分布"},
+{t:"アネクメーネ",d:"乾燥地域・高山地域・極地など、人間が居住していない地域のこと",c:"分布"},
+{t:"人口爆発",d:"20世紀後半以降、アジア・アフリカ・ラテンアメリカなどで起きた急激な人口増加のこと",c:"人口動態"},
+{t:"自然増加",d:"出生数と死亡数の差によって生じる人口変化。割合は自然増加率といい千分率(‰)で表す",c:"人口動態"},
+{t:"社会増加",d:"転入数と転出数の差によって生じる人口変化のこと",c:"人口動態"},
+{t:"人口転換",d:"多産多死→多産少死→少産少死へと人口動態が変化していくこと",c:"人口動態"},
+{t:"年少人口",d:"0〜14歳の人口のこと",c:"人口ピラミッド"},
+{t:"生産年齢人口",d:"15〜64歳の人口のこと",c:"人口ピラミッド"},
+{t:"老年人口",d:"65歳以上の人口のこと",c:"人口ピラミッド"},
+{t:"人口ピラミッド",d:"国や地域の性別・年齢別人口構成を表すグラフのこと",c:"人口ピラミッド"},
+{t:"富士山型(ピラミッド型)",d:"出生率・死亡率がともに高い多産多死社会に特徴的な、底辺の広い型",c:"人口ピラミッド"},
+{t:"釣鐘型(ベル型)",d:"出生率・死亡率がともに低く、出生率が死亡率以上で人口がほぼ停滞する型",c:"人口ピラミッド"},
+{t:"つぼ型(紡錘型)",d:"出生率が死亡率を下回り、人口が減少していく型",c:"人口ピラミッド"},
+{t:"ひょうたん型",d:"農村部で生産年齢人口(20〜30代)が流出してできる、若年層がくびれた型",c:"日本の人口問題"},
+{t:"星型",d:"都市部に農村から20〜30代の若年層が流入してできる型",c:"日本の人口問題"},
+{t:"移民",d:"政治・宗教の自由や生活改善、就業機会を求めて他国へ移住した人",c:"人口移動"},
+{t:"華僑",d:"中国国籍を保持したまま外国に移住して住む中国系の人々",c:"人口移動"},
+{t:"華人",d:"移住先の国籍を取得した中国系の人々",c:"人口移動"},
+{t:"印僑",d:"イギリス植民地時代に海外移住したインド系の人々",c:"人口移動"},
+{t:"難民",d:"紛争や人権侵害などにより出身国を離れざるを得なくなった人々",c:"人口移動"},
+{t:"環境難民",d:"環境破壊や気候変動によって移動を余儀なくされた人々",c:"人口移動"},
+{t:"少子化",d:"出生率の低下により年少人口が減少すること",c:"少子高齢化"},
+{t:"高齢化",d:"総人口に占める老年人口の割合が高まること",c:"少子高齢化"},
+{t:"少子高齢化",d:"少子化と高齢化が同時に進行すること",c:"少子高齢化"},
+{t:"人口問題",d:"人口の分布・増減・移動・年齢構成などに関わる社会的課題",c:"少子高齢化"},
+{t:"合計特殊出生率",d:"1人の女性が一生に産む子どもの数の平均値。2.1を下回ると人口減少しやすい",c:"少子高齢化"},
+{t:"家族計画",d:"出産する子どもの数や時期を計画的に調整する取り組み",c:"対策"},
+{t:"健康寿命",d:"健康上の問題なく日常生活を送れる期間の長さ",c:"高齢化の段階"},
+{t:"倍加年数",d:"老年人口の割合が7%から14%に達するまでにかかった年数。高齢化の速度の指標",c:"高齢化の段階"},
+{t:"高齢化社会",d:"老年人口の割合が7〜14%の社会",c:"高齢化の段階"},
+{t:"高齢社会",d:"老年人口の割合が14〜21%の社会",c:"高齢化の段階"},
+{t:"超高齢社会",d:"老年人口の割合が21%以上の社会",c:"高齢化の段階"},
+{t:"福祉国家",d:"社会保障・社会福祉制度が充実した国。デンマークなど北欧諸国が代表例",c:"対策"},
+{t:"ベビーブーム",d:"出生数が一時的に大幅に増加する現象。日本では1947〜49年と1971〜74年ごろ",c:"日本の人口問題"},
+{t:"過密",d:"都市部に人口が集中しすぎて生じる交通混雑・大気汚染などの問題",c:"日本の人口問題"},
+{t:"過疎",d:"農村部で人口が著しく減少すること",c:"日本の人口問題"},
+{t:"限界集落",d:"老年人口の割合が50%を超え、共同生活の維持が困難になった集落",c:"日本の人口問題"},
+{t:"Uターン",d:"大都市圏に出た人が出身地(地方)に戻ること",c:"日本の人口問題"},
+{t:"Iターン",d:"大都市圏出身者が出身地以外の地方に移住すること",c:"日本の人口問題"},
+{t:"ワークライフバランス",d:"仕事と生活の調和のこと",c:"対策"}
+];
+
+var FLOW=[
+{title:"世界の人口分布",sub:"エクメーネとアネクメーネ",detail:"人類が住むエクメーネは世界各地に広がるが、乾燥地域・高山・極地などにはアネクメーネ(非居住地域)も存在する。人口密度が高いのはモンスーンアジアや西ヨーロッパ、北アメリカ東部など。",tags:["エクメーネ","アネクメーネ"]},
+{title:"人口の変化と人口転換",sub:"自然増加+社会増加 → 多産多死から少産少死へ",detail:"人口は自然増加(出生ー死亡)と社会増加(転入ー転出)で変化する。経済発展とともに死亡率が先に下がり、遅れて出生率も下がる「人口転換」が起こり、この過程で人口爆発が生じやすい。",tags:["自然増加","社会増加","人口転換","人口爆発"]},
+{title:"人口ピラミッドの変化",sub:"富士山型 → 釣鐘型 → つぼ型",detail:"人口転換が進むと年少人口の割合が下がり老年人口の割合が上がるため、人口ピラミッドは底辺の広い富士山型から釣鐘型、つぼ型へと変化していく。",tags:["人口ピラミッド","年少人口","生産年齢人口","老年人口","富士山型(ピラミッド型)","釣鐘型(ベル型)","つぼ型(紡錘型)"]},
+{title:"国際的な人口移動",sub:"移民・難民として国境を越える人々",detail:"仕事や生活改善を求めて移住する移民のほか、紛争や人権侵害で出身国を離れる難民、環境変化による環境難民もいる。中国系の華僑・華人、インド系の印僑のように出身国の文化を保ちながら海外で暮らす人々もいる。",tags:["移民","華僑","華人","印僑","難民","環境難民"]},
+{title:"少子化と高齢化の進行",sub:"出生率の低下と老年人口割合の上昇",detail:"出生率が低下して年少人口が減る少子化と、老年人口の割合が高まる高齢化が同時に進むことを少子高齢化という。合計特殊出生率が2.1を下回る状態が続くと人口は減少しやすい。",tags:["少子化","高齢化","少子高齢化","合計特殊出生率","人口問題"]},
+{title:"高齢化の段階区分",sub:"高齢化社会(7%)→高齢社会(14%)→超高齢社会(21%)",detail:"老年人口の割合により社会は3段階に区分される。7%から14%への到達年数を倍加年数といい、進行速度の指標となる。日本は世界最速で超高齢社会に到達した。",tags:["高齢化社会","高齢社会","超高齢社会","倍加年数","健康寿命"]},
+{title:"日本の人口問題",sub:"ベビーブーム→少子高齢化、都市の過密と農村の過疎",detail:"戦後のベビーブームを経て出生率が低下し少子高齢化が進行。都市は過密、農村は過疎・限界集落の問題を抱え、人口ピラミッドも都市では星型、農村ではひょうたん型になりやすい。Uターン・Iターンによる移住支援も行われている。",tags:["ベビーブーム","過密","過疎","限界集落","Uターン","Iターン","星型","ひょうたん型"]},
+{title:"人口問題への対策",sub:"家族計画 / 福祉国家 / ワークライフバランス",detail:"出生率が高すぎる発展途上国では家族計画で抑制を図り、高齢化が進む先進国では福祉国家としての社会保障整備やワークライフバランスの実現で対応する。",tags:["家族計画","福祉国家","ワークライフバランス"]}
+];
+
+var flowHtml="";
+for(var i=0;i<FLOW.length;i++){
+  var s=FLOW[i];
+  var chips="";
+  for(var j=0;j<s.tags.length;j++){ chips+="<span class=\"chip\">"+s.tags[j]+"</span>"; }
+  flowHtml+="<div class=\"step\"><div class=\"step-head\" onclick=\"toggleStep("+i+")\">"
+    +"<div><span class=\"step-num\">"+(i+1)+"</span><span class=\"step-title\">"+s.title+"</span><div class=\"step-sub\">"+s.sub+"</div></div>"
+    +"<span id=\"chev"+i+"\">⌄</span></div>"
+    +"<div class=\"step-body\" id=\"body"+i+"\"><p style=\"margin:0 0 8px;\">"+s.detail+"</p>"+chips+"</div></div>";
+  if(i<FLOW.length-1){ flowHtml+="<div class=\"arrow\">↓</div>"; }
+}
+document.getElementById("panel-flow").innerHTML=flowHtml;
+
+function toggleStep(i){
+  var b=document.getElementById("body"+i);
+  var c=document.getElementById("chev"+i);
+  var isOpen=b.classList.contains("open");
+  b.classList.toggle("open");
+  c.textContent=isOpen?"⌄":"︿";
+}
+
+function showTab(name){
+  document.getElementById("panel-flow").classList.toggle("active",name=="flow");
+  document.getElementById("panel-cards").classList.toggle("active",name=="cards");
+  document.getElementById("panel-quiz").classList.toggle("active",name=="quiz");
+  document.getElementById("nav-flow").classList.toggle("active",name=="flow");
+  document.getElementById("nav-cards").classList.toggle("active",name=="cards");
+  document.getElementById("nav-quiz").classList.toggle("active",name=="quiz");
+}
+
+var cats=[];
+for(var k=0;k<TERMS.length;k++){ if(cats.indexOf(TERMS[k].c)==-1){ cats.push(TERMS[k].c); } }
+var sel=document.getElementById("cat-filter");
+for(var k=0;k<cats.length;k++){
+  var o=document.createElement("option"); o.value=cats[k]; o.textContent=cats[k]; sel.appendChild(o);
+}
+
+var deck=[],idx=0,flipped=false;
+function buildDeck(){
+  var f=document.getElementById("cat-filter").value;
+  deck=(f=="all")?TERMS.slice():TERMS.filter(function(x){return x.c==f;});
+}
+function resetDeck(){ buildDeck(); idx=0; flipped=false; renderCard(); }
+function shuffleDeck(){
+  for(var i=deck.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=deck[i]; deck[i]=deck[j]; deck[j]=tmp; }
+  idx=0; flipped=false; renderCard();
+}
+function renderCard(){
+  var item=deck[idx];
+  document.getElementById("flash-card").innerHTML=flipped?("<span class=\"def\">"+item.d+"</span>"):("<span class=\"term\">"+item.t+"</span>");
+  document.getElementById("card-counter").textContent=(idx+1)+" / "+deck.length+"　["+item.c+"]";
+}
+function flipCard(){ flipped=!flipped; renderCard(); }
+function nextCard(){ idx=(idx+1)%deck.length; flipped=false; renderCard(); }
+function prevCard(){ idx=(idx-1+deck.length)%deck.length; flipped=false; renderCard(); }
+
+var qScore=0,qTotal=0,qCurrent=null;
+function pickQuestion(){
+  var item=TERMS[Math.floor(Math.random()*TERMS.length)];
+  var pool=TERMS.filter(function(x){return x.t!=item.t;});
+  var opts=[item.t];
+  while(opts.length<4 && pool.length>0){
+    var pick=pool.splice(Math.floor(Math.random()*pool.length),1)[0];
+    if(opts.indexOf(pick.t)==-1){ opts.push(pick.t); }
+  }
+  for(var i=opts.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=opts[i]; opts[i]=opts[j]; opts[j]=tmp; }
+  qCurrent={item:item,opts:opts};
+  document.getElementById("quiz-question").textContent=item.d;
+  var html="";
+  for(var i=0;i<opts.length;i++){
+    html+="<button class=\"qopt\" id=\"opt"+i+"\" onclick=\"answerQuiz('"+opts[i].replace(/'/g,"\\'")+"',"+i+")\">"+opts[i]+"</button>";
+  }
+  document.getElementById("quiz-options").innerHTML=html;
+  document.getElementById("quiz-next").style.display="none";
+}
+function answerQuiz(choice,i){
+  qTotal++;
+  var correct=qCurrent.item.t;
+  for(var k=0;k<qCurrent.opts.length;k++){
+    document.getElementById("opt"+k).onclick=null;
+    if(qCurrent.opts[k]==correct){ document.getElementById("opt"+k).classList.add("correct"); }
+  }
+  if(choice==correct){ qScore++; } else { document.getElementById("opt"+i).classList.add("wrong"); }
+  document.getElementById("quiz-score").textContent="正解 "+qScore+" / 出題 "+qTotal;
+  document.getElementById("quiz-next").style.display="block";
+}
+function nextQuestion(){ pickQuestion(); }
+function restartQuiz(){ qScore=0; qTotal=0; document.getElementById("quiz-score").textContent="正解 0 / 出題 0"; pickQuestion(); }
+
+showTab('flow');
+resetDeck();
+pickQuestion();
+</script>
+</body>
+</html>
