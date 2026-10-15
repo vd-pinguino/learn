@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>日本 穴埋め暗記ツール</title>
+<style>
+:root{--bg:#fafaf8;--card:#fff;--tx:#222;--mu:#777;--bd:#ddd;--ac:#e8590c;--hd:#fbe3e6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1b1a;--card:#262625;--tx:#eee;--mu:#9a9a95;--bd:#444;--ac:#ff922b;--hd:#4a2a30}}
+:root[data-theme="dark"]{--bg:#1b1b1a;--card:#262625;--tx:#eee;--mu:#9a9a95;--bd:#444;--ac:#ff922b;--hd:#4a2a30}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;line-height:1.9;font-size:14px}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--bd);padding:8px 14px;z-index:5}
+h1{font-size:16px;margin:0 0 5px}
+.bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+button{font:inherit;font-size:13px;padding:4px 10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:8px;cursor:pointer}
+#prog{font-size:12px;color:var(--mu);margin-left:auto}
+main{max-width:860px;margin:0 auto;padding:6px 14px 40px}
+section{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin:12px 0;overflow:hidden}
+h2{font-size:15px;margin:0;padding:6px 12px;background:var(--hd)}
+h2 small{font-weight:400;color:var(--mu);margin-left:8px;font-size:11px}
+.nt{font-size:12px;color:var(--mu);padding:4px 12px 0}
+.row{display:flex;border-top:1px solid var(--bd)}
+.row:first-of-type{border-top:0}
+.l{flex:0 0 25%;max-width:150px;padding:4px 10px;background:var(--hd);font-weight:600;font-size:13px}
+.r{flex:1;padding:4px 10px}
+.b{display:inline-block;min-width:3.6em;text-align:center;border-bottom:2px solid var(--ac);cursor:pointer;color:transparent;user-select:none;margin:0 2px;position:relative}
+.b::before{content:attr(data-n);position:absolute;left:0;top:-6px;font-size:9px;color:var(--mu);line-height:1}
+.b.s{color:var(--ac);font-weight:700}
+.note{font-size:12px;color:var(--mu);margin:8px 0}
+@media(max-width:520px){.l{flex-basis:30%}}
+.fig{padding:6px 12px;text-align:center;border-top:1px solid var(--bd)}.fig svg{max-width:100%;height:auto}.sv{cursor:pointer}.sv text{fill:transparent;font-size:11px;text-anchor:middle}.sv.s text{fill:var(--ac);font-weight:700}.sv line{stroke:var(--ac);stroke-width:1.5}.cap{font-size:11px;color:var(--mu)}
+</style></head><body>
+<header><h1>日本(13章) 穴埋め暗記ツール</h1>
+<div class="bar"><button id="hA">すべて隠す</button><button id="sA">すべて表示</button><button id="th">🌓</button><span id="prog"></span></div></header>
+<main>
+<p class="note">下線をタップで答えを表示/非表示。長押し(PCはダブルクリック)で答えを編集できます。地図・写真・グラフは省略し、表と穴埋め部分を再構成しています。都道府県などの並びは画像からの読み取りなので、必要に応じて修正してください。</p>
+<div id="root"></div></main>
+<script>
+const S=[
+{t:"1 日本の地形と地体構造",p:"p.110",n:"新期造山帯に属し、険しい山地と短い河川が多い。",rows:[
+["砂嘴","{野付崎}(北海道)・三保松原(静岡県)"],
+["砂州","{天橋立}(京都府)・弓ヶ浜(鳥取県)"],
+["潟湖","{サロマ湖}(北海道)・{霞ヶ浦}(茨城県)"],
+["陸繋島","函館(北海道)・{志賀島}(福岡県)・江の島(神奈川県)"],
+["リアス海岸","{三陸海岸}(岩手・宮城県)・{若狭湾}(福井・京都府)・志摩半島(三重県)"],
+["断層湖","{琵琶湖}(滋賀県)・諏訪湖(長野県)"],
+["カルデラ","阿蘇カルデラ(熊本県)"],
+["カルデラ湖","{十和田湖}(秋田・青森県)・支笏湖(北海道)"],
+["カルスト台地","{秋吉台}(山口県)・平尾台(福岡県)"],
+["プレート","{北アメリカ}・{ユーラシア}・{太平洋}・{フィリピン海}の各プレート"],
+["大地溝帯","{フォッサマグナ}(西縁:{糸魚川=静岡}構造線)"],
+["内帯と外帯","西南日本は{中央}構造線で分かれる"]]},
+{t:"2 日本の気候",p:"p.110",n:"大陸東岸に位置し、季節風の影響を受ける。世界的多雨地域。",rows:[
+["冬","{シベリア}気団から北西季節風。日本海側は豪雪、太平洋側は乾燥"],
+["春・秋","移動性高気圧と{低気圧}が交互に通過し、周期的に天気が変化"],
+["梅雨","{小笠原}気団と{オホーツク海}気団の間に梅雨前線が形成。オホーツク海気団から吹く{やませ}は冷害の原因"],
+["夏〜初秋","小笠原気団におおわれ蒸し暑い。{台風}による大雨"]]},
+{t:"雨温図 (東京・金沢・帯広・潮岬)",p:"p.111",f:"clim",rows:[
+["Ⓐ 年降水量が少ない","{帯広}"],["Ⓑ 典型的なCfa気候","{東京}"],["Ⓒ 冬の降水量に注目","{金沢}"],["Ⓓ 年降水量2,500mm以上","{潮岬}"]]},
+{t:"3 農林水産業",p:"p.111",f:"fish",n:"主な農産物・家畜の生産上位都道府県(2024年)",rows:[
+["{米}","新潟・北海道・秋田・宮城・福島"],
+["小麦","北海道・福岡・佐賀・愛知・三重"],
+["{みかん}","和歌山・静岡・愛媛・熊本・佐賀"],
+["{りんご}","青森・長野・岩手・山形・秋田"],
+["ぶどう","山梨・長野・岡山・山形・福岡"],
+["{茶}","鹿児島・静岡・三重・京都・宮崎"],
+["{乳牛}","北海道・栃木・熊本・岩手・群馬"],
+["肉牛","北海道・鹿児島・宮崎・熊本・長崎"],
+["{豚}","鹿児島・北海道・宮崎・群馬・千葉"],
+["地域別農業産出額","{米}:東北・北陸に多い / {野菜}:大都市近郊に多い / {畜産}:北海道・九州南部に多い"],
+["漁業種類別生産量","1970年代に遠洋漁業が急減。{沖合}漁業は1980年代以降に急減。{遠洋}・{沿岸}も減少"]]},
+{t:"4 工業",p:"p.112",f:"ind",n:"日本における主要工業の分布",rows:[
+["工業地図","{鉄鋼}・{自動車}・{紙・パルプ}・{石油化学}・{化学繊維}・{IC}・{セメント}"],
+["三大工業地帯","京浜・{中京}・阪神。製造品出荷額は{中京}が最大"],
+["出荷額上位県","{愛知}・{静岡}・{神奈川}ほか"]]},
+{t:"5 エネルギー",p:"p.112",f:"en",n:"電源別発電電力量の変化(2011年の東日本大震災以降)",rows:[
+["電源","{水力}・{原子力}・{天然ガス}・{石炭}"]]},
+{t:"6 貿易 / 7 観光",p:"p.113",n:"主要輸入品と主な輸入先(2024年)",rows:[
+["{トウモロコシ}","アメリカ・ブラジル・アルゼンチン"],
+["{木材}","カナダ・アメリカ・スウェーデン・フィンランド"],
+["{羊毛}","中国・オーストラリアなど"],
+["{コーヒー}","ブラジル・ベトナム・コロンビア"],
+["{銅鉱}","チリ・インドネシア・オーストラリア・ペルー"],
+["{原油}","アラブ首長国連邦・サウジアラビア・クウェート・カタール"],
+["{自動車}","ドイツ・アメリカ・中国・イギリス"],
+["観光","スキー場(長野・新潟・{北海道})"],
+["外国人観光客","{韓国}・中国・台湾・{アメリカ}・ホンコン"]]},
+{t:"8 日本の都市",p:"p.113",f:"city",n:"平成の大合併により、都市の階層化が進む。",rows:[
+["政令指定都市","人口50万以上。{札幌市}・{仙台市}・{新潟市}・{静岡市}・{浜松市}・{岡山市}・{広島市}・{北九州市}ほか"],
+["{中核市}","人口20万以上の市"],
+["{特例市}","中核市と一律化するための暫定措置(廃止済み)"]]},
+{t:"9 人口",p:"p.114",n:"総人口世界12位(2024年)。2005年から減少傾向。",rows:[
+["人口が多い","{東京}・神奈川・{大阪}・愛知・{埼玉}"],
+["人口が少ない","鳥取・{島根}・{高知}・徳島・福井"],
+["人口密度(大)","東京・大阪・神奈川・埼玉・愛知"],
+["人口増加率(大)","東京・{沖縄}・神奈川・埼玉・千葉"],
+["人口増加率(小)","{秋田}・岩手・青森・{山形}・徳島"],
+["人口ピラミッド","1920年:富士山型 → 1970年:釣鐘型 → 2024年:つぼ型"],
+["在留外国人(国籍別)","{中国}23.2%・ベトナム16.8%・{韓国/朝鮮}・フィリピン9.1%・{ブラジル}"],
+["外国人労働者","1位{ベトナム}・2位{中国}・3位{フィリピン}"]]}
+];
+const sv=(a,x,y,w)=>'<g class="sv" data-a="'+a+'"><rect x="'+(x-w/2)+'" y="'+(y-12)+'" width="'+w+'" height="17" fill="transparent"/><text x="'+x+'" y="'+y+'">'+a+'</text><line x1="'+(x-w/2)+'" x2="'+(x+w/2)+'" y1="'+(y+3)+'" y2="'+(y+3)+'"/></g>';
+const tx=(s,x,y,z)=>'<text x="'+x+'" y="'+y+'" font-size="'+(z||10)+'" fill="currentColor" text-anchor="middle">'+s+'</text>';
+const ln=(a,b,c,d)=>'<line x1="'+a+'" y1="'+b+'" x2="'+c+'" y2="'+d+'" stroke="#999" stroke-width=".7"/>';
+const JM=(dx,dy)=>'<g transform="translate('+dx+','+dy+')" fill="#c9d6c4" stroke="#7a8a74"><polygon points="150,10 175,20 190,45 165,60 140,55 125,40 135,20"/><polygon points="135,85 150,95 150,125 140,150 145,170 130,185 105,195 80,205 55,215 40,222 30,215 55,200 85,185 105,170 110,150 115,125 120,100"/><polygon points="20,225 35,225 40,250 25,262 10,250"/><polygon points="55,225 85,220 88,232 60,238"/></g>';
+const cl=(T,P,lab,ox)=>{let g='<g transform="translate('+ox+',0)"><rect x="18" y="8" width="96" height="70" fill="none" stroke="#999"/>';P.forEach((p,i)=>{const h=p/450*70;g+='<rect x="'+(20+i*7.8)+'" y="'+(78-h)+'" width="5.5" height="'+h+'" fill="#4a7fd1"/>'});return g+'<polyline fill="none" stroke="#d9480f" stroke-width="1.5" points="'+T.map((t,i)=>(23+i*7.8)+','+(55-t*1.5)).join(' ')+'"/>'+tx(lab,66,94,12)+'</g>'};
+const CT=[["札幌",225,40,1,'R'],["仙台",217,115,1,'R'],["新潟",187,118,1,'L'],["首都圏",213,168,0,'R'],["静岡",200,183,1,'R'],["浜松",192,188,1,'R'],["名古屋",185,192,0,'R'],["京都",165,192,0,'L'],["阪神",158,199,0,'L'],["岡山",150,205,1,'L'],["広島",130,212,1,'L'],["北九州",108,222,1,'L'],["福岡",100,230,0,'L'],["熊本",95,248,0,'L']];
+const F={
+clim:()=>'<svg viewBox="0 0 500 100">'+cl([-8,-7,-2,5,11,15,19,21,16,10,3,-5],[50,40,60,70,100,100,130,150,150,100,70,50],'Ⓐ',0)+cl([5,6,9,14,19,22,26,27,23,18,13,8],[50,60,115,130,140,165,155,170,225,200,95,50],'Ⓑ',125)+cl([3,4,7,13,18,22,26,28,23,17,11,6],[260,170,165,150,150,200,260,170,230,170,250,310],'Ⓒ',250)+cl([7,8,11,15,19,22,26,27,25,20,15,10],[100,130,200,250,260,380,330,300,400,300,170,100],'Ⓓ',375)+'</svg><div class="cap">略図(青=降水量、赤=気温)。Ⓐ〜Ⓓが上の表の順に対応</div>',
+fish:()=>{const X=i=>30+i*40,Y=v=>150-v/700*130,pl=(a,c)=>'<polyline fill="none" stroke="'+c+'" stroke-width="2" points="'+a.map((v,i)=>X(i)+','+Y(v)).join(' ')+'"/>';let g='<svg viewBox="0 0 340 190"><rect x="30" y="10" width="240" height="140" fill="none" stroke="#999"/>'+pl([150,390,400,200,150,50,30],'#d9480f')+pl([150,200,650,600,330,280,200],'#4a7fd1')+pl([190,190,200,180,150,130,120],'#2f9e44');['1960','70','80','90','2000','10','22'].forEach((y,i)=>g+=tx(y,X(i),165));return g+sv('沖合',305,100,50)+sv('沿岸',305,127,50)+sv('遠洋',305,152,50)+tx('漁獲量(略図)',150,182)+'</svg>'},
+ind:()=>'<svg viewBox="0 0 340 285">'+JM(70,0)+'<polyline fill="none" stroke="#e8590c" stroke-opacity=".5" stroke-width="8" points="213,171 200,184 185,191 158,201 125,212 108,222"/>'+ln(213,171,280,168)+ln(200,184,280,190)+ln(185,191,280,208)+ln(97,190,185,191)+sv('神奈川',305,172,50)+sv('静岡',305,194,50)+sv('愛知',305,212,50)+sv('中京',38,190,50)+tx('京浜',240,160)+tx('阪神',140,190)+tx('北九州',70,222)+tx('太平洋ベルト(橙)',150,275)+'</svg>',
+en:()=>{const D=[[16,17,17,5,45,0],[12,23,22,10,33,0],[9,34,26,18,13,0],[8,25,29,27,9,2],[9,1,43,33,9,5],[8,9,33,28,5,17]],C=['#4a7fd1','#f2c94c','#2f9e44','#8d6e63','#555','#e599b0'];let g='<svg viewBox="0 0 340 175">';D.forEach((d,i)=>{let y=145;d.forEach((v,j)=>{const h=v*1.3;y-=h;g+='<rect x="'+(30+i*35)+'" y="'+y+'" width="26" height="'+h+'" fill="'+C[j]+'"/>'});g+=tx(['1980','90','2000','10','15','23'][i],43+i*35,160)});C.forEach((c,j)=>{const y=30+j*20;g+='<rect x="250" y="'+(y-9)+'" width="12" height="12" fill="'+c+'"/>'+(j<4?sv(['水力','原子力','天然ガス','石炭'][j],300,y,52):tx(['石油等','再エネ等'][j-4],290,y,11))});return g+'</svg><div class="cap">略図(数値は概数・年度は左から1980〜2023)</div>'},
+city:()=>{let g='<svg viewBox="0 0 340 285">'+JM(70,0),last={L:0,R:0};CT.slice().sort((a,b)=>a[2]-b[2]).forEach(c=>{const L=c[4]=='L',y=Math.max(c[2],last[c[4]]+14),x=L?38:305;last[c[4]]=y;g+=ln(c[1],c[2],L?63:280,y-4)+'<circle cx="'+c[1]+'" cy="'+c[2]+'" r="2.5" fill="#d9480f"/>'+(c[3]?sv(c[0],x,y,50):tx(c[0],x,y))});return g+'</svg>'}};
+const IM=[["鉄鋼","138,52 146,160 141,171 118,188 90,200 68,208 60,210 30,224 35,238"],["自動車","146,105 148,118 132,150 125,152 141,172 124,184 115,185 55,212 32,224 25,240"],["紙・パルプ","150,55 176,52 150,120 133,176 70,228 45,216"],["石油化学","150,55 146,160 143,171 141,171 110,190 90,202 68,208 40,218 35,238"],["化学繊維","108,152 106,165 98,184 116,187 68,210 70,228"],["IC","25,247 15,250 35,238 30,226 145,108 148,118 135,115 110,190 55,213 124,160"],["セメント","38,219 128,155 32,225 108,180 150,108 140,50 45,216"]];
+F.ind=()=>{let g='<svg viewBox="0 0 480 310">';IM.forEach((m,i)=>{const c=i%4,r=(i/4)|0;g+='<g transform="translate('+(c*120+20)+','+(r*150+6)+') scale(.42)">'+JM(0,0)+m[1].split(' ').map(p=>{const q=p.split(',');return '<circle cx="'+q[0]+'" cy="'+q[1]+'" r="6" fill="#d9480f" fill-opacity=".85"/>'}).join('')+'</g>'+tx('①②③④⑤⑥⑦'[i],c*120+10,r*150+20,13)+sv(m[0],c*120+60,r*150+138,80)});return g+tx('分布の略図',420,215,11)+tx('(●=主な立地)',420,232,10)+'</svg><div class="cap">①〜⑦の分布から、工業の種類を答える(鉄鋼・自動車・紙・パルプ・石油化学・化学繊維・IC・セメント)。位置は概略です</div>'};
+const root=document.getElementById('root'),prog=document.getElementById('prog');
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function fill(s,c){return esc(s).replace(/\{([^}]*)\}/g,(m,a)=>{c.n++;return '<span class="b" data-n="'+c.n+'" data-a="'+a+'">'+a+'</span>'})}
+S.forEach(s=>{const c={n:0},sec=document.createElement('section');
+ let h='<h2>'+s.t+'<small>'+s.p+'</small></h2>'+(s.n?'<div class="nt">'+esc(s.n)+'</div>':'');
+ s.rows.forEach(r=>{h+='<div class="row"><div class="l">'+fill(r[0],c)+'</div><div class="r">'+fill(r[1],c)+'</div></div>'});
+ if(s.f)h+='<div class="fig">'+F[s.f]()+'</div>';sec.innerHTML=h;root.appendChild(sec)});
+function upd(){const a=document.querySelectorAll('.b,.sv'),s=document.querySelectorAll('.b.s,.sv.s');prog.textContent='表示中 '+s.length+' / '+a.length}
+document.querySelectorAll('.b,.sv').forEach(b=>{let t;
+ const ed=()=>{const v=prompt('答えを編集',b.dataset.a);if(v){b.dataset.a=v;(b.querySelector('text')||b).textContent=v}};
+ b.onclick=()=>{b.classList.toggle('s');upd()};b.ondblclick=ed;
+ b.ontouchstart=()=>{t=setTimeout(ed,700)};b.ontouchend=b.ontouchmove=()=>clearTimeout(t)});
+hA.onclick=()=>{document.querySelectorAll('.b,.sv').forEach(b=>b.classList.remove('s'));upd()};
+sA.onclick=()=>{document.querySelectorAll('.b,.sv').forEach(b=>b.classList.add('s'));upd()};
+th.onclick=()=>{const r=document.documentElement,d=getComputedStyle(r).getPropertyValue('--bg').trim()==='#1b1b1a';r.dataset.theme=d?'light':'dark'};
+upd();
+</script></body></html>
